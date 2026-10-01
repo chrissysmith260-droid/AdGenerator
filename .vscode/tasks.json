@@ -1,0 +1,35 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "serve-book-page",
+            "type": "process",
+            "command": "python3",
+            "args": [
+                "-u",
+                "-m",
+                "http.server",
+                "8080",
+                "--bind",
+                "0.0.0.0",
+                "--directory",
+                "docs"
+            ],
+            "isBackground": true,
+            "problemMatcher": {
+                "owner": "custom",
+                "pattern": [
+                    {
+                        "regexp": "^(NO_MATCHING_SERVER_DIAGNOSTIC)(.*)$",
+                        "file": 1,
+                        "message": 2
+                    }
+                ],
+                "background": {
+                    "activeOnStart": true,
+                    "endsPattern": "^Serving HTTP on .*"
+                }
+            }
+        }
+    ]
+}

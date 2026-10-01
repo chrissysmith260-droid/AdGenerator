@@ -19,6 +19,12 @@ It generates:
 	emails only to people who opted in.
 - `docs/index.html`: a mobile-friendly public page linking to the book listings.
 
+To preview locally, run `python3 -m http.server 8080 --bind 0.0.0.0 --directory docs`
+or start **Book page: local preview** from VS Code's Run and Debug panel. For a
+public forwarded URL, start **Book page: public HTTPS preview** and paste the
+HTTPS URL for port 8080 when prompted. The preview server speaks HTTP inside
+the workspace; the forwarded-port service provides HTTPS externally.
+
 ### Before publishing
 
 Edit the `BOOKS` entries in `zero_cost_ad_pipeline.py`. The title and description
