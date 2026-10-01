@@ -1,0 +1,29 @@
+Attached Element Context from Integrated Browser
+
+Element: body
+
+URL: https://jubilant-carnival-5gpxg6rrwxw639w-8080.app.github.dev/
+
+HTML Path: body
+
+Outer HTML:
+```html
+<body></body>
+```
+
+Dimensions:
+- top: 0px
+- left: 0px
+- width: 711px
+- height: 642px
+
+CSS:
+```css
+
+
+/* Resolved values */
+margin: 8px /*UA*/;
+display: block;
+height: 626px;
+width: 695px;
+```
