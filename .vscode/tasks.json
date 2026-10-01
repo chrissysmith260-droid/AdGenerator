@@ -18,18 +18,23 @@
             "isBackground": true,
             "problemMatcher": {
                 "owner": "custom",
-                "pattern": [
-                    {
-                        "regexp": "^(NO_MATCHING_SERVER_DIAGNOSTIC)(.*)$",
-                        "file": 1,
-                        "message": 2
-                    }
-                ],
+                "pattern": {
+                    "regexp": "^(NO_MATCHING_SERVER_DIAGNOSTIC)(.*)$",
+                    "file": 1,
+                    "message": 2
+                },
                 "background": {
                     "activeOnStart": true,
                     "endsPattern": "^Serving HTTP on .*"
                 }
             }
+        },
+        {
+            "type": "cmake",
+            "label": "CMake: install",
+            "command": "install",
+            "problemMatcher": [],
+            "detail": "CMake template install task"
         }
     ]
 }
