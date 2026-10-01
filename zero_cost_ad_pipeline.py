@@ -163,7 +163,11 @@ def render_site(books):
     (() => {{
       const STORAGE_KEY = 'ad-generator-personalization';
       const catalog = JSON.parse(document.body.dataset.bookCatalog || '[]');
-      const endpoint = document.body.dataset.trackEndpoint || '';
+      const configuredEndpoint = (document.body.dataset.trackEndpoint || '').trim();
+      const params = new URLSearchParams(window.location.search);
+      const endpoint = configuredEndpoint || params.get('trackingEndpoint') || (
+        ['localhost', '127.0.0.1', '[::1]'].includes(window.location.hostname) ? '' : new URL('/api/personalization', window.location.origin).toString()
+      );
 
       const readState = () => {{
         try {{
