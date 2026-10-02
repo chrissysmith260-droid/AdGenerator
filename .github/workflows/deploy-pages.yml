@@ -7,6 +7,8 @@ on:
       - "docs/**"
       - "zero_cost_ad_pipeline.py"
       - ".github/workflows/deploy-pages.yml"
+      - ".github/workflows/static.yml"
+      - ".github/workflows/jekyll-gh-pages.yml"
   workflow_dispatch:
 
 permissions:
