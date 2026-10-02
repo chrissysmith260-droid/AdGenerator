@@ -11,6 +11,7 @@ ROOT = Path(__file__).resolve().parent
 SITE_DIR = ROOT / "docs"
 SITE_URL = "https://chrissysmith260-droid.github.io/AdGenerator/"
 AMAZON_AUTHOR_URL = "https://www.amazon.com/Chrissi-D-Smith/e/B0DHYQ67JM"
+INDEXNOW_KEY = "a27e5c82fa314d67be98ac125daf4031"
 
 BOOKS = [
     {
@@ -33,6 +34,8 @@ BOOKS = [
       "and examining genetic, cellular, immune, and stress-related factors."
     ),
     "tags": ["metabolic health", "cellular biology", "nonfiction"],
+    "match_terms": ["obesity", "metabolic illness", "genetics", "chronic stress"],
+    "published_on": "2026-09-29",
     "cover": "https://m.media-amazon.com/images/I/51s0ty+r+kL._SY342_.jpg",
         "url": "https://www.amazon.com/dp/B0HLFX1YKT",
     },
@@ -50,6 +53,7 @@ BOOKS = [
       "wilderness of British Columbia."
     ),
     "tags": ["fiction", "survival", "chosen family"],
+    "published_on": "2026-09-28",
     "cover": "https://m.media-amazon.com/images/I/51wzdvpIyrL._SY342_.jpg",
         "url": "https://www.amazon.com/dp/B0HL989S11",
     },
@@ -68,6 +72,8 @@ BOOKS = [
       "the experience of navigating healthcare."
     ),
     "tags": ["personal narrative", "health", "nonfiction"],
+    "match_terms": ["uric acid", "gout", "chronic inflammation", "metabolic dysfunction"],
+    "published_on": "2026-08-23",
     "isbn": "9798240841606",
     "publication_note": "Print edition published through IngramSpark.",
     "cover": "https://m.media-amazon.com/images/I/71V-yXM2fxL._SY342_.jpg",
@@ -86,6 +92,8 @@ BOOKS = [
       "A faith-centered reflection on navigating life with AuDHD."
     ),
     "tags": ["faith", "neurodiversity", "personal reflection"],
+    "published_on": "2026-03-09",
+    "review_count": 0,
     "cover": "https://m.media-amazon.com/images/I/915sVSBE7fL._SY342_.jpg",
     "url": "https://www.amazon.com/dp/B0GHVCTWVP",
   },
@@ -248,6 +256,92 @@ def render_rss(books):
 
     xml = ET.tostring(rss, encoding="unicode")
     return f'<?xml version="1.0" encoding="UTF-8"?>\n{xml}\n'
+
+
+def render_indexnow_payload():
+    """Return an IndexNow notification for URLs hosted by this project."""
+    return json.dumps(
+        {
+            "host": urlparse(SITE_URL).hostname,
+            "key": INDEXNOW_KEY,
+            "keyLocation": f"{SITE_URL}{INDEXNOW_KEY}.txt",
+            "urlList": [
+                SITE_URL,
+                f"{SITE_URL}feed.xml",
+                f"{SITE_URL}sitemap.xml",
+                f"{SITE_URL}book-discovery.js",
+            ],
+        }
+    )
+
+
+def render_widget(books):
+    """Build a self-contained contextual widget that links directly to books."""
+    catalog = [
+        {
+            "title": book["title"],
+            "description": book["description"],
+            "tags": book.get("tags", []),
+            "matchTerms": book.get("match_terms", []),
+            "publishedOn": book.get("published_on"),
+            "reviewCount": book.get("review_count"),
+            "url": book["url"],
+        }
+        for book in books
+    ]
+    catalog_json = json.dumps(catalog, ensure_ascii=True).replace("</", "<\\/")
+    return f"""(() => {{
+  const books = {catalog_json};
+  const slots = document.querySelectorAll('[data-book-discovery]');
+  if (!slots.length) return;
+
+  const pageText = [
+    document.title,
+    document.querySelector('meta[name="description"]')?.content || '',
+    document.querySelector('main')?.innerText || document.querySelector('article')?.innerText || ''
+  ].join(' ').toLowerCase();
+
+  const matches = books.map((book) => {{
+    const terms = [...book.tags, ...book.matchTerms];
+    const score = terms.filter((term) =>
+      term.length > 2 && pageText.includes(term.toLowerCase())
+    ).length;
+    const ageMs = book.publishedOn ? Date.now() - Date.parse(book.publishedOn) : Infinity;
+    const newUnreviewed = book.reviewCount === 0 && ageMs >= 0 && ageMs <= 365 * 24 * 60 * 60 * 1000;
+    return {{ book, score, newUnreviewed }};
+  }}).filter((result) => result.score > 0)
+    .sort((left, right) => Number(right.newUnreviewed) - Number(left.newUnreviewed) || right.score - left.score);
+
+  const match = matches[0];
+  if (!match) return;
+
+  for (const slot of slots) {{
+    const ad = document.createElement('aside');
+    ad.setAttribute('aria-label', 'Sponsored book');
+    ad.style.cssText = 'border:1px solid #d8ddd4;border-left:4px solid #b94935;padding:16px;margin:16px 0;background:#fff;color:#172b2b;font:16px/1.5 Georgia,serif;max-width:540px';
+
+    const label = document.createElement('p');
+    label.textContent = match.newUnreviewed
+      ? 'Sponsored book · new release with no reviews yet'
+      : 'Sponsored book';
+    label.style.cssText = 'margin:0 0 8px;color:#506360;font:600 12px/1.4 system-ui,sans-serif;text-transform:uppercase';
+
+    const title = document.createElement('a');
+    title.textContent = match.book.title;
+    title.href = match.book.url;
+    title.target = '_blank';
+    title.rel = 'noopener noreferrer';
+    title.style.cssText = 'color:#165c4a;font-size:20px;font-weight:bold';
+
+    const description = document.createElement('p');
+    description.textContent = match.book.description;
+    description.style.cssText = 'margin:8px 0 0';
+
+    ad.append(label, title, description);
+    slot.replaceChildren(ad);
+  }}
+}})();
+"""
 
 
 def render_site(books):
@@ -495,6 +589,8 @@ def main():
     (ROOT / "campaign_pack.md").write_text(render_campaign_pack(BOOKS), encoding="utf-8")
     (SITE_DIR / "index.html").write_text(render_site(BOOKS), encoding="utf-8")
     (SITE_DIR / "feed.xml").write_text(render_rss(BOOKS), encoding="utf-8")
+    (SITE_DIR / "book-discovery.js").write_text(render_widget(BOOKS), encoding="utf-8")
+    (SITE_DIR / f"{INDEXNOW_KEY}.txt").write_text(f"{INDEXNOW_KEY}\n", encoding="utf-8")
     (SITE_DIR / "robots.txt").write_text(
         f"User-agent: *\nAllow: /\nSitemap: {SITE_URL}sitemap.xml\n",
         encoding="utf-8",
@@ -510,7 +606,7 @@ def main():
         f'<?xml version="1.0" encoding="UTF-8"?>\n{sitemap_xml}\n',
         encoding="utf-8",
     )
-    print("Generated campaign_pack.md and the docs/ author library, RSS feed, and search files")
+    print("Generated campaign drafts, author library, RSS feed, contextual widget, and search files")
 
 
 if __name__ == "__main__":

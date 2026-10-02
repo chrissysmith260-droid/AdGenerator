@@ -23,7 +23,30 @@ It generates:
 - `docs/index.html`: a searchable author library with book listings and a
 	visitor-initiated share button.
 - `docs/feed.xml`: an RSS feed for readers who subscribe through their feed app.
+- `docs/book-discovery.js`: a contextual widget for participating websites.
+- `docs/<IndexNow key>.txt`: public ownership verification for search crawling.
 - `docs/robots.txt` and `docs/sitemap.xml`: basic search-engine discovery files.
+
+### Contextual network prototype
+
+The widget does not need a separate page for each book. A participating site
+owner can place this where a contextual book recommendation may appear:
+
+```html
+<div data-book-discovery></div>
+<script defer src="https://chrissysmith260-droid.github.io/AdGenerator/book-discovery.js"></script>
+```
+
+It compares the current page's title, description, and main/article text against
+catalog topics, then shows at most one clearly labeled sponsored book linking
+directly to its retailer. Matching happens in the visitor's browser; the widget
+does not read or transfer browsing history, keep an identifier, or send page
+text to the catalog. Loading the script does make a normal request to GitHub
+Pages; a host can instead copy and serve the script locally. A recent book gets
+priority only when its publication date is known, its review count is explicitly
+zero, and its topics match the page. Unknown review counts are never treated as
+zero. Site owners must choose to install the widget; it cannot add itself to
+unrelated sites or search results.
 
 To preview locally, run `python3 -m http.server 8080 --bind 0.0.0.0 --directory docs`
 or start **Book page: local preview** from VS Code's Run and Debug panel. For a
@@ -42,7 +65,12 @@ listings did not expose their descriptions to the catalog builder, so those
 entries link readers to Amazon for the full descriptions.
 
 The included GitHub Actions workflow regenerates and publishes the author library
-and RSS feed when its source or `docs/` changes on `main`. Social networks are not
+and RSS feed when its source or `docs/` changes on `main`. After deployment, it
+submits only this site's library, feed, sitemap, and widget URLs to IndexNow,
+which notifies participating search engines to crawl them. This does not submit
+Amazon product URLs, guarantee indexing, or improve ranking by itself. Google
+Search Console remains a separate, free verification and sitemap-submission step.
+Social networks are not
 connected yet: automatic posts require authorization for accounts you control
 and each platform's supported API. Credentials must be stored as repository
 secrets, never in this repository or chat. In the repository's **Settings >

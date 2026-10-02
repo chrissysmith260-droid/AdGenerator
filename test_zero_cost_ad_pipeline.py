@@ -1,4 +1,5 @@
 import unittest
+import json
 import xml.etree.ElementTree as ET
 
 import zero_cost_ad_pipeline as pipeline
@@ -45,6 +46,20 @@ class SiteRenderTests(unittest.TestCase):
             pipeline.SITE_URL,
         )
 
+    def test_indexnow_notifies_only_owned_site_urls(self):
+        payload = json.loads(pipeline.render_indexnow_payload())
+        expected_host = "chrissysmith260-droid.github.io"
+
+        self.assertEqual(payload["host"], expected_host)
+        self.assertEqual(
+            payload["keyLocation"],
+            f"{pipeline.SITE_URL}{pipeline.INDEXNOW_KEY}.txt",
+        )
+        self.assertTrue(payload["urlList"])
+        self.assertTrue(
+            all(url.startswith(pipeline.SITE_URL) for url in payload["urlList"])
+        )
+
     def test_rss_feed_lists_books_with_stable_ids(self):
         feed = ET.fromstring(pipeline.render_rss(pipeline.BOOKS))
         items = feed.findall("./channel/item")
@@ -74,6 +89,21 @@ class SiteRenderTests(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             pipeline.validate_books([book])
+
+    def test_context_widget_matches_topics_and_links_to_retailer(self):
+        widget = pipeline.render_widget(pipeline.BOOKS)
+
+        self.assertIn("data-book-discovery", widget)
+        self.assertIn("document.querySelector('article')?.innerText", widget)
+        self.assertNotIn("document.body.innerText", widget)
+        self.assertIn("https://www.amazon.com/dp/B0HG8531WW", widget)
+        self.assertIn("Sponsored book", widget)
+        self.assertIn("new release with no reviews yet", widget)
+        self.assertIn('"reviewCount": 0', widget)
+        self.assertIn("Number(right.newUnreviewed)", widget)
+        self.assertNotIn("localStorage", widget)
+        self.assertNotIn("sendBeacon", widget)
+        self.assertNotIn("fetch(", widget)
 
 
 if __name__ == "__main__":
