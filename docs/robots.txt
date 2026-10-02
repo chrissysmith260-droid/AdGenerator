@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://chrissysmith260-droid.github.io/AdGenerator/sitemap.xml

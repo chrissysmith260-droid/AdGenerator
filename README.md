@@ -2,9 +2,12 @@
 
 ## Free promotion pipeline
 
-This script does not send ads or make network requests. It creates copy you can
-review and share manually, plus a static book page that can be hosted for free
-with GitHub Pages.
+The generator does not send ads or make network requests. It creates optional
+promotion drafts, a static author library, and an RSS feed that updates whenever
+the catalog is regenerated. Feed readers can subscribe and check for updates
+automatically; this reaches subscribers, not people who have not opted in. The
+page does not transmit visitor browsing activity; book-cover images are loaded
+from Amazon's image host.
 
 Run it with Python 3:
 
@@ -17,7 +20,10 @@ It generates:
 - `campaign_pack.md`: short social posts, community-post drafts, and an opt-in
 	email draft for each book. Share only where promotion is allowed, and send
 	emails only to people who opted in.
-- `docs/index.html`: a mobile-friendly public page linking to the book listings.
+- `docs/index.html`: a searchable author library with book listings and a
+	visitor-initiated share button.
+- `docs/feed.xml`: an RSS feed for readers who subscribe through their feed app.
+- `docs/robots.txt` and `docs/sitemap.xml`: basic search-engine discovery files.
 
 To preview locally, run `python3 -m http.server 8080 --bind 0.0.0.0 --directory docs`
 or start **Book page: local preview** from VS Code's Run and Debug panel. For a
@@ -27,14 +33,21 @@ the workspace; the forwarded-port service provides HTTPS externally.
 
 ### Before publishing
 
-Edit the `BOOKS` entries in `zero_cost_ad_pipeline.py`. The title and description
-for `B0HLFX1YKT` are placeholders because they were not included in the original
-script. Check that every title and description accurately describes its book,
-then rerun the generator.
+Edit the `BOOKS` entries in `zero_cost_ad_pipeline.py` to add or correct books,
+descriptions, topics, cover images, ISBNs, and retailer links. The current catalog
+contains ten Kindle titles found on the public Amazon author page and author
+search; it may not include every print, IngramSpark, or other retailer edition.
+Review the entries and add any missing titles before publishing. Two Amazon
+listings did not expose their descriptions to the catalog builder, so those
+entries link readers to Amazon for the full descriptions.
 
-To publish the page with GitHub Pages, push the repository to GitHub, open the
-repository's **Settings > Pages**, choose **Deploy from a branch**, select the
-`main` branch and `/docs` folder, and save. GitHub will provide the public page
-URL when deployment completes. Publishing the page makes it accessible; it does
-not automatically place ads in other people's browsing or send promotional
-messages.
+The included GitHub Actions workflow regenerates and publishes the author library
+and RSS feed when its source or `docs/` changes on `main`. Social networks are not
+connected yet: automatic posts require authorization for accounts you control
+and each platform's supported API. Credentials must be stored as repository
+secrets, never in this repository or chat. In the repository's **Settings >
+Pages**, set the build and deployment source to **GitHub Actions**. Then push to
+`main` or run **Deploy book page** from the Actions tab. The public page will be available at
+https://chrissysmith260-droid.github.io/AdGenerator/ after the workflow
+completes. Publishing makes the library accessible; it does not guarantee feed
+placement or automatically send promotional messages.
