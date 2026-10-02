@@ -32,6 +32,8 @@ jobs:
         run: python3 zero_cost_ad_pipeline.py
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
+        with:
+          enablement: true
       - name: Upload book page
         uses: actions/upload-pages-artifact@v3
         with:
